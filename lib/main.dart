@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:senior_design/pages/homePage.dart';
 import 'package:senior_design/pages/takePicturePage.dart';
 
 import 'src/app.dart';
@@ -25,11 +26,9 @@ Future<void> main() async {
 
   runApp(
     MaterialApp(
-      theme: ThemeData.dark(),
-      home: TakePictureScreen(
-        // Pass the appropriate camera to the TakePictureScreen widget.
-        camera: firstCamera,
-      ),
-    ),
+        theme: ThemeData.dark(),
+        home: HomePage(
+          camera: firstCamera,
+        )),
   );
 }
