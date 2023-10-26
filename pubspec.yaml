@@ -10,10 +10,13 @@ environment:
   sdk: '>=2.18.0-109.0.dev <3.0.0'
 
 dependencies:
+  camera: ^0.10.5+5
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  path: ^1.8.2
+  path_provider: ^2.1.1
 
 dev_dependencies:
   flutter_test:
