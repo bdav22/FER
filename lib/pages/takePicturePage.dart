@@ -50,16 +50,27 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
   //method to toggle front vs back camera
   Future<void> _toggleCamera() async {
+
+    //get all available cameras
     final cameras = await availableCameras();
     setState(() {
+      //circular transition between the cameras
       _currentCameraIndex = (_currentCameraIndex + 1) % cameras.length; 
     });
+
+    //get the new camera
     final newCamera = cameras[_currentCameraIndex];
+
+    //dispose of the old controller
     await _controller.dispose();
+
+    //create a new controller
     _controller = CameraController(
       newCamera,
       ResolutionPreset.medium,
     );
+
+    //init it
     await _controller.initialize();
   }
 
