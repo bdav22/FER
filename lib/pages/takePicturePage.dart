@@ -71,7 +71,9 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     );
 
     //init it
-    await _controller.initialize();
+    _initializeControllerFuture = _controller.initialize();
+    setState(() {});
+
   }
 
   @override
