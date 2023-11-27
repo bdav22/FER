@@ -3,17 +3,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:senior_design/pages/homePage.dart';
-import 'package:senior_design/pages/takePicturePage.dart';
-
-import 'src/app.dart';
-import 'src/settings/settings_controller.dart';
-import 'src/settings/settings_service.dart';
 
 import 'dart:async';
-import 'dart:io';
-
-import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
 
 Future<void> main() async {
   // Ensure that plugin services are initialized so that `availableCameras()`
