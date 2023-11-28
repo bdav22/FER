@@ -38,7 +38,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     // Next, initialize the controller. This returns a Future.
     _initializeControllerFuture = _controller.initialize();
   }
-  
 
   @override
   void dispose() {
@@ -47,15 +46,13 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     super.dispose();
   }
 
-
   //method to toggle front vs back camera
   Future<void> _toggleCamera() async {
-
     //get all available cameras
     final cameras = await availableCameras();
     setState(() {
       //circular transition between the cameras
-      _currentCameraIndex = (_currentCameraIndex + 1) % cameras.length; 
+      _currentCameraIndex = (_currentCameraIndex + 1) % cameras.length;
     });
 
     //get the new camera
@@ -73,7 +70,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     //init it
     _initializeControllerFuture = _controller.initialize();
     setState(() {});
-
   }
 
   @override
@@ -114,7 +110,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             if (!mounted) return;
             await Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => DisplayPictureScreen(imagePath: image.path),
+                builder: (context) =>
+                    DisplayPictureScreen(imagePath: image.path),
               ),
             );
           } catch (e) {
@@ -126,6 +123,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     );
   }
 }
+
 // A widget that displays the picture taken by the user.
 class DisplayPictureScreen extends StatelessWidget {
   final String imagePath;
@@ -134,11 +132,20 @@ class DisplayPictureScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double displayWidth = MediaQuery.of(context).size.width;
+    double displayHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(title: const Text('Display the Picture')),
       // The image is stored as a file on the device. Use the `Image.file`
       // constructor with the given path to display the image.
-      body: Image.file(File(imagePath)),
+      body: Container(
+          color: Colors.transparent,
+          width: displayWidth,
+          height: displayHeight - 175,
+          child: Image.file(
+            File(imagePath),
+            fit: BoxFit.fill,
+          )),
     );
   }
 }

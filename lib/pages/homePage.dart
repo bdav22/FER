@@ -126,7 +126,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: BoxDecoration(
                       color: Colors.blue.shade700,
                       borderRadius: BorderRadius.circular(buttonRadius)),
-                  child: Center(
+                  child: const Center(
                     child: Text(
                       'Take A Photo',
                       style: TextStyle(
