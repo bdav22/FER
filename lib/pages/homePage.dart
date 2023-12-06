@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:senior_design/pages/learnMorePage.dart';
 import 'package:senior_design/pages/takePicturePage.dart';
 
 class HomePage extends StatefulWidget {
@@ -42,6 +43,9 @@ class _HomePageState extends State<HomePage> {
             child: InkWell(
                 onTap: () {
                   HapticFeedback.lightImpact();
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => LearnMorePage(),
+                  ));
                 },
                 child: Ink(
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 15),
