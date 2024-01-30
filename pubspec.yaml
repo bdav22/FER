@@ -10,6 +10,7 @@ environment:
   sdk: '>=2.18.0-109.0.dev <3.0.0'
 
 dependencies:
+  heic_to_jpg: ^0.2.0
   camera: ^0.10.5+5
   flutter:
     sdk: flutter

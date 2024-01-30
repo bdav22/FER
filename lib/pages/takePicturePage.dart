@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:heic_to_jpg/heic_to_jpg.dart';
 
 // A screen that allows users to take a picture using a given camera.
 class TakePictureScreen extends StatefulWidget {
@@ -113,15 +114,16 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                             await _initializeControllerFuture;
                             final image = await _controller.takePicture();
                             if (!mounted) return;
+                            //adding heic to jpg converter and python script
+                            // String? jpegPath =
+                            //     await HeicToJpg.convert(image.path);
                             await Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) =>
                                     DisplayPictureScreen(imagePath: image.path),
                               ),
                             );
-                          } catch (e) {
-                            print(e);
-                          }
+                          } catch (e) {}
                         },
                         child: Icon(
                           Icons.camera_alt,
@@ -215,3 +217,50 @@ class DisplayPictureScreen extends StatelessWidget {
     );
   }
 }
+
+// Future<File> fixExifRotation(String imagePath) async {
+//     final originalFile = File(imagePath);
+//     List<int> imageBytes = await originalFile.readAsBytes();
+
+//     final originalImage = img.decodeImage(imageBytes);
+
+//     final height = originalImage.height;
+//     final width = originalImage.width;
+
+//     // Let's check for the image size
+//     // This will be true also for upside-down photos but it's ok for me
+//     if (height >= width) {
+//       // I'm interested in portrait photos so
+//       // I'll just return here
+//       return originalFile;
+//     }
+
+//     // We'll use the exif package to read exif data
+//     // This is map of several exif properties
+//     // Let's check 'Image Orientation'
+//     final exifData = await readExifFromBytes(imageBytes);
+
+//     img.Image fixedImage;
+
+//     if (height < width) {
+//       logger.logInfo('Rotating image necessary');
+//       // rotate
+//       if (exifData['Image Orientation'].printable.contains('Horizontal')) {
+//         fixedImage = img.copyRotate(originalImage, 90);
+//       } else if (exifData['Image Orientation'].printable.contains('180')) {
+//         fixedImage = img.copyRotate(originalImage, -90);
+//       } else if (exifData['Image Orientation'].printable.contains('CCW')) {
+//         fixedImage = img.copyRotate(originalImage, 180);
+//       } else {
+//         fixedImage = img.copyRotate(originalImage, 0);
+//       }
+//     }
+
+//     // Here you can select whether you'd like to save it as png
+//     // or jpg with some compression
+//     // I choose jpg with 100% quality
+//     final fixedFile =
+//         await originalFile.writeAsBytes(img.encodeJpg(fixedImage));
+
+//     return fixedFile;
+//   }
