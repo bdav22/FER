@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:heic_to_jpg/heic_to_jpg.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
 
 // A screen that allows users to take a picture using a given camera.
 class TakePictureScreen extends StatefulWidget {
@@ -72,6 +75,33 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     setState(() {});
   }
 
+  // Set up the URL for your server endpoint
+  String serverUrl = 'https://127.0.0.1:5000/get_result';
+
+  void sendImage(imagePath) async {
+    // Send the image to the server
+    try {
+      var response = await http.post(
+        Uri.parse(serverUrl),
+        body: File(imagePath),
+      );
+
+      //if sent successful
+      if (response.statusCode == 200) {
+        print('Image sent successfully');
+      } else {
+        print('Failed to send image. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error sending image: $error');
+    }
+  }
+
+  Future getExpression(url) async {
+    http.Response Response = await http.get(url);
+    return Response.body;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,6 +144,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                             await _initializeControllerFuture;
                             final image = await _controller.takePicture();
                             if (!mounted) return;
+                            sendImage(image.path);
+                            getExpression(serverUrl);
                             //adding heic to jpg converter and python script
                             // String? jpegPath =
                             //     await HeicToJpg.convert(image.path);
@@ -195,9 +227,9 @@ class DisplayPictureScreen extends StatelessWidget {
                   color: Colors.blue.shade900,
                   borderRadius: BorderRadius.circular(40),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                  children: const [
                     Text(
                       "Woohoo! You Are ",
                       style: TextStyle(fontSize: 25),
