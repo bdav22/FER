@@ -2,10 +2,8 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:heic_to_jpg/heic_to_jpg.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart';
 
 // A screen that allows users to take a picture using a given camera.
 class TakePictureScreen extends StatefulWidget {
@@ -76,17 +74,42 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   }
 
   // Set up the URL for your server endpoint
-  String serverUrl = 'https://127.0.0.1:5000/get_result';
+  String serverUrl = 'http://hoangdao297.pythonanywhere.com';
 
-  void sendImage(imagePath) async {
-    // Send the image to the server
+  Future<String> getFromServer() async {
     try {
-      var response = await http.post(
-        Uri.parse(serverUrl),
-        body: File(imagePath),
-      );
+      // Make the GET request
+      final response = await http.get(Uri.parse(serverUrl));
 
-      //if sent successful
+      // Check for successful response
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        throw Exception(
+            'Failed to get data from server. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Error sending GET request: $error');
+    }
+  }
+
+  void sendImage(File image) async {
+    try {
+      var uri = Uri.parse(serverUrl);
+      var request = http.MultipartRequest('POST', uri);
+
+      // Add image file part
+      var part = http.MultipartFile.fromBytes(
+        'img',
+        image.readAsBytesSync(),
+        filename: image.path.split('/').last,
+      );
+      request.files.add(part);
+
+      // Execute the request
+      var response = await request.send();
+
+      // Handle response based on status code
       if (response.statusCode == 200) {
         print('Image sent successfully');
       } else {
@@ -144,8 +167,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                             await _initializeControllerFuture;
                             final image = await _controller.takePicture();
                             if (!mounted) return;
-                            sendImage(image.path);
-                            getExpression(serverUrl);
+
                             //adding heic to jpg converter and python script
                             // String? jpegPath =
                             //     await HeicToJpg.convert(image.path);
@@ -155,6 +177,9 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                                     DisplayPictureScreen(imagePath: image.path),
                               ),
                             );
+                            getFromServer();
+                            // sendImage(File(image.path));
+                            // getExpression(serverUrl);
                           } catch (e) {}
                         },
                         child: Icon(
