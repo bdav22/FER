@@ -167,10 +167,11 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                             await _initializeControllerFuture;
                             final image = await _controller.takePicture();
                             if (!mounted) return;
-                            //send image to http
-                            sendImage(image.path);
-                            //get expression from http
-                            getExpression(serverUrl);
+                            // //send image to http
+                            // sendImage(image.path);
+                            // //get expression from http
+                            // getExpression(serverUrl);
+                            getFromServer();
 
                             //adding heic to jpg converter and python script
                             // String? jpegPath =
