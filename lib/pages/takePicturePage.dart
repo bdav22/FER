@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
@@ -74,15 +75,17 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   }
 
   // Set up the URL for your server endpoint
-  String serverUrl = 'http://hoangdao297.pythonanywhere.com';
+  String serverUrl = 'http://hoangdao297.pythonanywhere.com/get_result';
 
   Future<String> getFromServer() async {
     try {
+      print('running');
       // Make the GET request
       final response = await http.get(Uri.parse(serverUrl));
 
       // Check for successful response
       if (response.statusCode == 200) {
+        print(response.body);
         return response.body;
       } else {
         throw Exception(
@@ -93,7 +96,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     }
   }
 
-  void sendImage(File image) async {
+  sendImage(File image) async {
     try {
       var uri = Uri.parse(serverUrl);
       var request = http.MultipartRequest('POST', uri);
@@ -107,11 +110,18 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       request.files.add(part);
 
       // Execute the request
+      print('sending');
       var response = await request.send();
+      var responseBody = await response.stream.transform(utf8.decoder).join();
 
       // Handle response based on status code
+
       if (response.statusCode == 200) {
-        print('Image sent successfully');
+        var parsedJson = jsonDecode(responseBody);
+
+        // Print the parsed JSON data
+        print('Image sent successfully. JSON response: $parsedJson');
+        return parsedJson;
       } else {
         print('Failed to send image. Status code: ${response.statusCode}');
       }
@@ -122,6 +132,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
   Future getExpression(url) async {
     http.Response Response = await http.get(url);
+    print(Response.body);
     return Response.body;
   }
 
@@ -171,19 +182,19 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                             // sendImage(image.path);
                             // //get expression from http
                             // getExpression(serverUrl);
-                            getFromServer();
 
                             //adding heic to jpg converter and python script
                             // String? jpegPath =
                             //     await HeicToJpg.convert(image.path);
+                            print('running sendImage');
+                            var emotion = await sendImage(File(image.path));
+                            // getExpression(serverUrl);
                             await Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    DisplayPictureScreen(imagePath: image.path),
+                                builder: (context) => DisplayPictureScreen(
+                                    imagePath: image.path, emotion: emotion),
                               ),
                             );
-                            getFromServer();
-                            // sendImage(File(image.path));
                             // getExpression(serverUrl);
                           } catch (e) {}
                         },
@@ -216,8 +227,10 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 // A widget that displays the picture taken by the user.
 class DisplayPictureScreen extends StatelessWidget {
   final String imagePath;
+  final emotion;
 
-  const DisplayPictureScreen({super.key, required this.imagePath});
+  const DisplayPictureScreen(
+      {super.key, required this.imagePath, required this.emotion});
 
   @override
   Widget build(BuildContext context) {
@@ -259,15 +272,15 @@ class DisplayPictureScreen extends StatelessWidget {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
+                  children: [
+                    const Text(
                       "Woohoo! You Are ",
-                      style: TextStyle(fontSize: 25),
+                      style: TextStyle(fontSize: 15),
                     ),
                     Text(
-                      "Happy",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                      emotion.toString(),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                   ],
                 ),
