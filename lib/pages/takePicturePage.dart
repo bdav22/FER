@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 
@@ -22,6 +23,7 @@ class TakePictureScreen extends StatefulWidget {
 class TakePictureScreenState extends State<TakePictureScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
+  bool loading = false;
 
   //keep track of what camera is being used, 0 for back 1 for front
   int _currentCameraIndex = 1;
@@ -123,7 +125,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         print('Image sent successfully. JSON response: $parsedJson');
         return parsedJson;
       } else {
-        print('Failed to send image. Status code: ${response.statusCode}');
+        print('Unable to determine face. Status code: ${response.statusCode}');
       }
     } catch (error) {
       print('Error sending image: $error');
@@ -138,96 +140,122 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          'Take A Photo',
-          style: TextStyle(fontWeight: FontWeight.bold),
+    return Stack(children: [
+      Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text(
+            'Take A Photo',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.blue.shade900,
         ),
-        backgroundColor: Colors.blue.shade900,
-      ),
-      body: FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return Stack(alignment: Alignment.bottomCenter, children: [
-              Column(
-                children: <Widget>[
-                  Expanded(
-                    child: CameraPreview(_controller),
-                  ),
-                ],
-              ),
-              Container(
-                color: Colors.blue.shade900.withOpacity(0.3),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            minimumSize: Size(100, 100),
-                            shape: CircleBorder(),
-                            shadowColor: Colors.blue,
-                            backgroundColor: Colors.blue.shade900,
-                            foregroundColor: Colors.blue.shade100),
-                        onPressed: () async {
-                          try {
-                            await _initializeControllerFuture;
-                            final image = await _controller.takePicture();
-                            if (!mounted) return;
-                            // //send image to http
-                            // sendImage(image.path);
-                            // //get expression from http
-                            // getExpression(serverUrl);
-
-                            //adding heic to jpg converter and python script
-                            // String? jpegPath =
-                            //     await HeicToJpg.convert(image.path);
-                            print('running sendImage');
-                            var emotion = await sendImage(File(image.path));
-                            // getExpression(serverUrl);
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => DisplayPictureScreen(
-                                    imagePath: image.path, emotion: emotion),
-                              ),
-                            );
-                            // getExpression(serverUrl);
-                          } catch (e) {}
-                        },
-                        child: Icon(
-                          Icons.camera_alt,
-                          size: 30,
-                        ),
-                      ),
+        body: FutureBuilder<void>(
+          future: _initializeControllerFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return Stack(alignment: Alignment.bottomCenter, children: [
+                Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: CameraPreview(_controller),
                     ),
                   ],
                 ),
-              ),
-            ]);
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
+                Container(
+                  color: Colors.blue.shade900.withOpacity(0.3),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              minimumSize: Size(100, 100),
+                              shape: CircleBorder(),
+                              shadowColor: Colors.blue,
+                              backgroundColor: Colors.blue.shade900,
+                              foregroundColor: Colors.blue.shade100),
+                          onPressed: () async {
+                            try {
+                              setState(() {
+                                loading = true;
+                              });
+                              await _initializeControllerFuture;
+                              final image = await _controller.takePicture();
+                              if (!mounted) return;
+                              // //send image to http
+                              // sendImage(image.path);
+                              // //get expression from http
+                              // getExpression(serverUrl);
+
+                              //adding heic to jpg converter and python script
+                              // String? jpegPath =
+                              //     await HeicToJpg.convert(image.path);
+
+                              var emotion = await sendImage(File(image.path));
+                              setState(() {
+                                loading = false;
+                              });
+                              // getExpression(serverUrl);
+                              emotion != null
+                                  ? await Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            DisplayPictureScreen(
+                                                imagePath: image.path,
+                                                emotion: emotion['emotion']),
+                                      ),
+                                    )
+                                  : Fluttertoast.showToast(
+                                      msg:
+                                          "Unable to detect face. Please try again",
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      gravity: ToastGravity.CENTER,
+                                      backgroundColor:
+                                          Colors.black.withOpacity(0.7),
+                                      textColor: Colors.white,
+                                      fontSize: 16.0);
+                              ;
+                              // getExpression(serverUrl);
+                            } catch (e) {}
+                          },
+                          child: Icon(
+                            Icons.camera_alt,
+                            size: 30,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ]);
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          focusColor: Colors.blue,
+          foregroundColor: Colors.blue.shade900,
+          backgroundColor: Colors.white,
+          onPressed: _toggleCamera,
+          child: const Icon(Icons.switch_camera),
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        focusColor: Colors.blue,
-        foregroundColor: Colors.blue.shade900,
-        backgroundColor: Colors.white,
-        onPressed: _toggleCamera,
-        child: const Icon(Icons.switch_camera),
-      ),
-    );
+      loading == true
+          ? Scaffold(
+              backgroundColor: Colors.black.withOpacity(0.5),
+              body: const Center(child: CircularProgressIndicator()))
+          : const SizedBox(width: 0),
+    ]);
   }
 }
 
 // A widget that displays the picture taken by the user.
 class DisplayPictureScreen extends StatelessWidget {
   final String imagePath;
-  final emotion;
+  final String emotion;
 
   const DisplayPictureScreen(
       {super.key, required this.imagePath, required this.emotion});
@@ -278,7 +306,7 @@ class DisplayPictureScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 15),
                     ),
                     Text(
-                      emotion.toString(),
+                      emotion,
                       style: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 15),
                     ),
