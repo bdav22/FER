@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 
 // A screen that allows users to take a picture using a given camera.
@@ -129,6 +128,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       }
     } catch (error) {
       print('Error sending image: $error');
+      return error.toString();
     }
   }
 
@@ -198,24 +198,36 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                                 loading = false;
                               });
                               // getExpression(serverUrl);
-                              emotion != null
-                                  ? await Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            DisplayPictureScreen(
-                                                imagePath: image.path,
-                                                emotion: emotion['emotion']),
-                                      ),
-                                    )
-                                  : Fluttertoast.showToast(
+                              emotion ==
+                                      'Failed host lookup: \'hoangdao297.pythonanywhere.com\''
+                                  ? Fluttertoast.showToast(
                                       msg:
-                                          "Unable to detect face. Please try again",
+                                          "Unable to connect to the server. Please try again later.",
                                       toastLength: Toast.LENGTH_SHORT,
                                       gravity: ToastGravity.CENTER,
                                       backgroundColor:
                                           Colors.black.withOpacity(0.7),
                                       textColor: Colors.white,
-                                      fontSize: 16.0);
+                                      fontSize: 16.0)
+                                  : emotion != null
+                                      ? await Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                DisplayPictureScreen(
+                                                    imagePath: image.path,
+                                                    emotion:
+                                                        emotion['emotion']),
+                                          ),
+                                        )
+                                      : Fluttertoast.showToast(
+                                          msg:
+                                              "Unable to detect face. Please try again",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.CENTER,
+                                          backgroundColor:
+                                              Colors.black.withOpacity(0.7),
+                                          textColor: Colors.white,
+                                          fontSize: 16.0);
                               ;
                               // getExpression(serverUrl);
                             } catch (e) {}
@@ -303,12 +315,12 @@ class DisplayPictureScreen extends StatelessWidget {
                   children: [
                     const Text(
                       "Woohoo! You Are ",
-                      style: TextStyle(fontSize: 15),
+                      style: TextStyle(fontSize: 18),
                     ),
                     Text(
                       emotion,
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 15),
+                          fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                   ],
                 ),
