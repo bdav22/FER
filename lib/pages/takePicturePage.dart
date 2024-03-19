@@ -111,7 +111,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       request.files.add(part);
 
       // Execute the request
-      print('sending');
+      // print('sending');
       var response = await request.send();
       var responseBody = await response.stream.transform(utf8.decoder).join();
 
@@ -121,13 +121,13 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         var parsedJson = jsonDecode(responseBody);
 
         // Print the parsed JSON data
-        print('Image sent successfully. JSON response: $parsedJson');
+        // print('Image sent successfully. JSON response: $parsedJson');
         return parsedJson;
       } else {
-        print('Unable to determine face. Status code: ${response.statusCode}');
+        // print('Unable to determine face. Status code: ${response.statusCode}');
       }
     } catch (error) {
-      print('Error sending image: $error');
+      // print('Error sending image: $error');
       return error.toString();
     }
   }
@@ -313,14 +313,17 @@ class DisplayPictureScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      "Woohoo! You Are ",
-                      style: TextStyle(fontSize: 18),
+                    Text(
+                      emotion == 'happy'
+                          ? "Woohoo! You Are "
+                          : 'Your emotion is ',
+                      style: TextStyle(fontSize: displayWidth * 0.05),
                     ),
                     Text(
                       emotion,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 18),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: displayWidth * 0.05),
                     ),
                   ],
                 ),
