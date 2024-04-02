@@ -20,6 +20,7 @@ dependencies:
   path_provider: ^2.1.1
   http: ^0.13.3
   fluttertoast: ^8.2.4
+  lottie: ^3.0.0
 
 dev_dependencies:
   flutter_test:

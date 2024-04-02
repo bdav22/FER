@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 
 // A screen that allows users to take a picture using a given camera.
 class TakePictureScreen extends StatefulWidget {
@@ -140,6 +141,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double displayWidth = MediaQuery.of(context).size.width;
+    double displayHeight = MediaQuery.of(context).size.height;
     return Stack(children: [
       Scaffold(
         appBar: AppBar(
@@ -181,6 +184,11 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                               setState(() {
                                 loading = true;
                               });
+                              // Navigator.of(context).push(
+                              //   MaterialPageRoute(
+                              //     builder: (context) => LoadingPage(),
+                              //   ),
+                              // );
                               await _initializeControllerFuture;
                               final image = await _controller.takePicture();
                               if (!mounted) return;
@@ -255,11 +263,35 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           child: const Icon(Icons.switch_camera),
         ),
       ),
+      // loading == true
+      //     ? Scaffold(
+      //         backgroundColor: Colors.black.withOpacity(0.5),
+      //         body: const Center(child: CircularProgressIndicator()))
+      //     : const SizedBox(width: 0),
       loading == true
           ? Scaffold(
-              backgroundColor: Colors.black.withOpacity(0.5),
-              body: const Center(child: CircularProgressIndicator()))
-          : const SizedBox(width: 0),
+              backgroundColor: Colors.blue.shade900,
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                        height: displayHeight * 0.2,
+                        child: Lottie.asset('lib/assets/loading.json')),
+                    SizedBox(height: displayHeight * 0.03),
+                    Text(
+                      'Detecting Expression',
+                      style: TextStyle(
+                          color: const Color.fromARGB(255, 224, 233, 254),
+                          fontWeight: FontWeight.bold,
+                          fontSize: displayWidth * 0.05),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : const SizedBox(height: 0)
     ]);
   }
 }
